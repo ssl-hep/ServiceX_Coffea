@@ -52,7 +52,8 @@ class Executor(ABC):
             Stream of up to date histograms. Grows as each result is received
         """
         # Stream transformed file references from ServiceX
-        result_file_stream = datasource.stream_result_file_urls()
+        # result_file_stream = datasource.stream_result_file_urls()
+        result_file_stream = datasource.stream_result_files()
 
         # Launch a task against this file
         func_results = self.launch_analysis_tasks_from_stream(result_file_stream,
