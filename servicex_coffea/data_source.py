@@ -52,3 +52,17 @@ class DataSource:
             async for file in dataset.get_data_rootfiles_url_stream(self.query.value()):
                 print("Dataset ", file)
                 yield file
+
+    async def stream_result_files(self) -> AsyncGenerator[StreamInfoUrl, None]:
+        '''Launch all datasources at once
+
+        TODO: This is currently sync (that outter for loop does one datasource and then the next).
+        Need to move to a different paradigm. Perhaps using the `aiostream` library.
+
+        Yields:
+            [type]: [description]
+        '''
+        for dataset in self.datasets:
+            async for file in dataset.get_data_rootfiles_stream(self.query.value()):
+                print("Dataset ", file)
+                yield file
