@@ -140,3 +140,6 @@ cython_debug/
 .idea/
 .ipynb_checkpoints/
 cache/
+
+# VS Code config
+.vscode

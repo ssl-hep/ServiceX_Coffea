@@ -26,7 +26,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from abc import ABC, abstractmethod
+import os
 from typing import Any, Callable, AsyncGenerator
+from urllib.parse import urlparse, unquote
+from urllib.request import url2pathname
 
 import aiostream
 import uproot
@@ -94,6 +97,13 @@ class Executor(ABC):
         async for sx_data in result_file_stream:
             file_url = sx_data.url
             print("----", file_url)
+
+            # Parse the absolute path out if this is a file:// uri. THis is due to a bug
+            # in uproot4 that means `file://` isn't parsed correctly on windows.
+            # TODO: Remove this hack when `uproot4` has been updated.
+            p = urlparse(file_url)
+            if p.scheme == 'file':
+                file_url = url2pathname(unquote(p.path))
 
             # Determine the tree name if we've not gotten it already
             if tree_name is None:
