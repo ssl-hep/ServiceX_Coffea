@@ -50,7 +50,6 @@ class DataSource:
         '''
         for dataset in self.datasets:
             async for file in dataset.get_data_rootfiles_url_stream(self.query.value()):
-                print("Dataset ", file)
                 yield file
 
     async def stream_result_files(self) -> AsyncGenerator[StreamInfoUrl, None]:
@@ -64,5 +63,4 @@ class DataSource:
         '''
         for dataset in self.datasets:
             async for file in dataset.get_data_rootfiles_stream(self.query.value()):
-                print("Dataset ", file)
                 yield file

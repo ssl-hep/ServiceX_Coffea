@@ -25,10 +25,35 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from typing import Optional
+from dask.distributed import Client
+from .executor import run_coffea_processor, Executor
 
-from .data_source import DataSource
-from .sx_qastle import FuncAdlDataset, sx_event_stream
-from .analysis import Analysis
-from .accumulator import Accumulator
-from .local_executor import LocalExecutor
-from .dask_executor import DaskExecutor
+
+class DaskExecutor(Executor):
+    def __init__(self, client_addr: Optional[str] = None):
+        '''Create a Dask executor to process the analysis
+
+        Args:
+            client_addr (Optional[str]): If `None` then create a local cluster that runs in-process.
+                                         Otherwise connect to an already existing cluster.
+        '''
+        self.is_local = client_addr is None
+        self.dask = Client(threads_per_worker=10, asynchronous=True) if self.is_local \
+            else Client(client_addr, asynchronous=True)
+
+    def get_result_file_stream(self, datasource):
+        if self.is_local:
+            return datasource.stream_result_files()
+        else:
+            return datasource.stream_result_file_urls()
+
+    def run_async_analysis(self, file_url, tree_name, accumulator, process_func):
+        data_result = self.dask.submit(run_coffea_processor,
+                                       events_url=file_url,
+                                       tree_name=tree_name,
+                                       accumulator=accumulator,
+                                       proc=process_func)
+        print("Data Result ", data_result)
+
+        return data_result

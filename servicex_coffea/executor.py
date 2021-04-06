@@ -44,6 +44,9 @@ class Executor(ABC):
     def run_async_analysis(self, file_url: str, tree_name: str, accumulator: Accumulator, process_func: Callable):
         raise NotImplementedError
 
+    def get_result_file_stream(self, datasource):
+        return datasource.stream_result_file_urls()
+
     async def execute(self, analysis, datasource):
         """
         Launch an analysis against the given dataset on the implementation's task framework
@@ -55,8 +58,7 @@ class Executor(ABC):
             Stream of up to date histograms. Grows as each result is received
         """
         # Stream transformed file references from ServiceX
-        # result_file_stream = datasource.stream_result_file_urls()
-        result_file_stream = datasource.stream_result_files()
+        result_file_stream = self.get_result_file_stream(datasource)
 
         # Launch a task against this file
         func_results = self.launch_analysis_tasks_from_stream(result_file_stream,

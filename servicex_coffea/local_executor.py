@@ -32,6 +32,9 @@ class LocalExecutor(Executor):
     def __init__(self):
         pass
 
+    def get_result_file_stream(self, datasource):
+        return datasource.stream_result_files()
+
     def run_async_analysis(self, file_url, tree_name, accumulator, process_func):
         return self._async_analysis(events_url=file_url,
                                     tree_name=tree_name,
